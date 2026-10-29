@@ -1,0 +1,10 @@
+bot_detector_venv/
+__pycache__/
+*.pyc
+*.db
+*.sqlite3
+.DS_Store
+.idea/
+.vscode/
+models/
+data/
