@@ -1,0 +1,79 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python src/ml_pipeline/preprocess.py
+    deps:
+    - path: data/raw/train_raw.csv
+      hash: md5
+      md5: 13dd0ca62affe550bf267ae5a4989502
+      size: 357194
+    - path: data/raw/verified_feedback.csv
+      hash: md5
+      md5: f48238aae9b9d58117f2a6f8eaa35253
+      size: 61
+    - path: src/ml_pipeline/preprocess.py
+      hash: md5
+      md5: 3939e05ee7f78cd0dd2c002be3b9b3a4
+      size: 3118
+    params:
+      params.yaml:
+        preprocess.min_text_length: 2
+        preprocess.random_state: 42
+        preprocess.test_size: 0.2
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: e0ea0ff6948fff8ee8afd3dfad0919dc
+      size: 100670
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 5d43dc87da11edfc5f6edd92f43a85a3
+      size: 412335
+  train:
+    cmd: python src/ml_pipeline/train.py
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 5d43dc87da11edfc5f6edd92f43a85a3
+      size: 412335
+    - path: src/ml_pipeline/train.py
+      hash: md5
+      md5: 13b4f136b3cc8da621cfacb0ad5a93fd
+      size: 1706
+    params:
+      params.yaml:
+        train.c_reg: 1.0
+        train.max_features: 5000
+        train.max_iter: 1000
+        train.ngram_range:
+        - 1
+        - 2
+        train.random_state: 42
+    outs:
+    - path: models/baseline_tfidf_logreg.pkl
+      hash: md5
+      md5: bb996b1947ed207916db1b946c89cb18
+      size: 397649
+  evaluate:
+    cmd: python src/ml_pipeline/evaluate.py
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: e0ea0ff6948fff8ee8afd3dfad0919dc
+      size: 100670
+    - path: models/baseline_tfidf_logreg.pkl
+      hash: md5
+      md5: bb996b1947ed207916db1b946c89cb18
+      size: 397649
+    - path: src/ml_pipeline/evaluate.py
+      hash: md5
+      md5: 75dac3fcfa989075d0b5f6b4b30ae944
+      size: 1975
+    params:
+      params.yaml:
+        evaluate.bot_threshold: 0.5
+    outs:
+    - path: metrics/evaluation.json
+      hash: md5
+      md5: 2def14d91b5042fcff221223a4a406f9
+      size: 307

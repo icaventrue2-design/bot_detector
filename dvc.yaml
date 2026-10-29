@@ -1,0 +1,40 @@
+stages:
+  preprocess:
+    cmd: python src/ml_pipeline/preprocess.py
+    deps:
+      - src/ml_pipeline/preprocess.py
+      - data/raw/train_raw.csv
+      - data/raw/verified_feedback.csv
+    params:
+      - preprocess.test_size
+      - preprocess.random_state
+      - preprocess.min_text_length
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+
+  train:
+    cmd: python src/ml_pipeline/train.py
+    deps:
+      - src/ml_pipeline/train.py
+      - data/processed/train.csv
+    params:
+      - train.max_features
+      - train.ngram_range
+      - train.c_reg
+      - train.max_iter
+      - train.random_state
+    outs:
+      - models/baseline_tfidf_logreg.pkl
+
+  evaluate:
+    cmd: python src/ml_pipeline/evaluate.py
+    deps:
+      - src/ml_pipeline/evaluate.py
+      - data/processed/test.csv
+      - models/baseline_tfidf_logreg.pkl
+    params:
+      - evaluate.bot_threshold
+    metrics:
+      - metrics/evaluation.json:
+          cache: false
